@@ -1,81 +1,52 @@
 <script setup>
 import axios from "axios";
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import { useRouter } from 'vue-router'
-
 
 const router = useRouter()
 
 const newCategory = ref('')
 
-const categories = ref([])
-
 const category = ref({})
 
+// const dataFlag = ref(false)
+
 let categoryId = ''
+
+async function initial() {
+    try {
+        const res = await axios.get('/api/max')
+        categoryId = res.data.id
+        router.push({name: 'category.show', params: { categoryId: categoryId }})
+    } catch(err) {
+        console.log('error handling')
+    }
+
+}
+
+initial()
 
 const submitNewCategory = () => {
   return new Promise((resolve) => {
     axios.post('/api/categories/store', {
         title: newCategory.value
     })
-    resolve();
+    resolve()
   })
 }
 
-const getMaxIdCategory = () => {
-    return new Promise((resolve) => {
-        axios.get('/api/max')
-            .then((res) => {
-                category.value = res.data
-                categoryId = category.value.id
-                resolve();
-            })
-    })
-}
-
-
 const addCategory = async () => {
     await submitNewCategory()
-    await getCategories()
-    await getMaxIdCategory()
-    newCategory.value = ''
+    const a1 = await getMaxIdCategory()
+    categoryId =a1.data.id
     router.push({name: 'category.show', params: { categoryId: categoryId }})
-
-}
-
-const getCategories = async () => {
-
-    return new Promise((resolve) => {
-        axios.get('/api/categories')
-            .then((res) => {
-                categories.value = res.data
-                if (categories.value.length === 0)
-                {
-                    noData.value = !noData.value
-                }
-            })
-        resolve()
-
-    })
 }
 
 
-onMounted(() => {
-    axios.get('/api/max')
-        .then((res) => {
-            // category.value = res.data
-            // categoryId = category.value.id
-            categoryId = res.data.id
-            router.push({name: 'category.show', params: { categoryId: categoryId }})
-        })
-        .catch((err) => {
-            // console.log('ssssssuuuuu')
-        })
-})
-
+const getMaxIdCategory = () => {
+    return axios.get('/api/max')
+}
 </script>
-
 
 <template>
     <div class="left-container">
@@ -84,7 +55,7 @@ onMounted(() => {
             <input type="text" v-model="newCategory">
         </form>
     </div>
-
+    <!-- <div class="right-container" v-if="dataFlag"> -->
     <div class="right-container">
         <div>No category</div>
     </div>

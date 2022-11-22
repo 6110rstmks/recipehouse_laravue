@@ -22,25 +22,20 @@ const recipes = ref([])
 const newRecipe = ref('')
 
 let categoryId = parseInt(route.params.categoryId)
-// let categoryId = route.params.categoryId
-
 
 const submitNewCategory = () => {
   return new Promise((resolve) => {
     axios.post('/api/categories/store', {
         title: newCategory.value
     })
-    console.log(1)
     resolve();
-
   })
 }
 
 const addCategory = async () => {
     await submitNewCategory()
-    console.log(2)
-    await getMaxIdCategory()
-    console.log(4)
+    const a1 = await getMaxIdCategory()
+    categoryId =a1.data.id
     newCategory.value = ''
     router.push({name: 'category.show', params: { categoryId: categoryId }})
 }
@@ -48,7 +43,6 @@ const addCategory = async () => {
 const deleteCategory = async (id) => {
     if (confirm('Are you sure?'))
     {
-        console.log(`categoryId:${categoryId}`)
         axios.delete('/api/categories/' + id)
 
         //  カテゴリが一件しかない状態でそれを削除するとデフォルトページへ遷移
@@ -57,48 +51,39 @@ const deleteCategory = async (id) => {
             return
         }
 
-        // 現在のカテゴリの画面と同じカテゴリを削除したとき。
+        // if deleting the same category that is currently displayed on the screen...
 
         if (categoryId === id)
         {
-            console.log('akasatan')
-            let cde = await getMaxIdCategory()
+            let res = await getMaxIdCategory()
+            categoryId = res.data.id
             router.push({name: 'category.show', params: { categoryId: categoryId }})
+            return
         }
 
-        getCategories()
+        const res1 = await getCategories()
+        categories.value = res1.data
     }
 }
 
-const getCategory = async () => {
-    const res = await axios.get('/api/categories/' + categoryId)
-    category.value = res.data
+// The category acquired in this function is displayed on the right screen.
+
+
+const getCategory = () => {
+    return axios.get('/api/categories/' + categoryId)
+}
+
+
+
+const getCategories = () => {
+    return axios.get('/api/categories')
 }
 
 
 const getMaxIdCategory = () => {
-    return new Promise((resolve) => {
-        axios.get('/api/max')
-            .then((res) => {
-                category.value = res.data
-                categoryId = category.value.id
-                console.log(3)
-                resolve();
-            })
-    })
+    return axios.get('/api/max')
 }
 
-
-const getCategories = async () => {
-    return new Promise((resolve) => {
-        axios.get('/api/categories')
-            .then((res) => {
-                categories.value = res.data
-            })
-        resolve()
-    })
-
-}
 
 // ----------------------------
 // function relate to recipe
@@ -109,39 +94,43 @@ const submitNewRecipe = () => {
     })
 }
 
-const addRecipe = () => {
+const addRecipe = async() => {
     submitNewRecipe()
-    getRecipes()
+    const a2 = await getRecipes()
+    recipes.value = a2.data
     newRecipe.value = ''
 }
 
-const getRecipes = async () => {
-    const res = await axios.get('/api/categories/' + categoryId + '/recipes/')
-    recipes.value = res.data
+
+const getRecipes = () => {
+    return axios.get('/api/categories/' + categoryId + '/recipes/')
 }
+
+const getCategoriesAndCategoryAndRecipes = async () => {
+    categoryId = parseInt(route.params.categoryId)
+    const res1 = await getCategories()
+    const res2 = await getCategory()
+    const res3 = await getRecipes()
+    category.value = res2.data
+    recipes.value = res3.data
+    categories.value = res1.data
+
+
+}
+getCategoriesAndCategoryAndRecipes()
 
 // -----------------------
 
-onMounted(() => {
-    categoryId = parseInt(route.params.categoryId)
-    getCategories()
-    getCategory()
-        .then((data) => {
-            getRecipes()
-        })
+onMounted(async () => {
+    // getCategoriesAndCategoryAndRecipes()
 })
 
 
-watch(route, () => {
-    categoryId = parseInt(route.params.categoryId)
+watch(route, async () => {
     if (!isNaN(categoryId))
     {
-        getCategories()
-        getCategory()
-        getRecipes()
+        getCategoriesAndCategoryAndRecipes()
     }
-
-
 })
 </script>
 
