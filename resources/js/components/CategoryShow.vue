@@ -1,6 +1,6 @@
 <script setup>
 import axios from "axios";
-import { defineProps, onMounted, ref, watch} from "vue"
+import { defineProps, ref, watch} from "vue"
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -21,14 +21,15 @@ const recipes = ref([])
 
 const newRecipe = ref('')
 
-let categoryId = parseInt(route.params.categoryId)
+let categoryId = ''
+
+// let categoryId = parseInt(route.params.categoryId)
 
 const submitNewCategory = () => {
     return new Promise((resolve) => {
         axios.post('/api/categories/store', {
             title: newCategory.value
         }).then(response => {
-            console.log('nuts')
             resolve(response);
         })
     })
@@ -48,7 +49,7 @@ const deleteCategory = async (id) => {
     {
         const comp = await axios.delete('/api/categories/' + id)
 
-        //  カテゴリが一件しかない状態でそれを削除するとデフォルトページへ遷移
+        //  move default page when category deleting the category that only one
         if (categories.value.length === 1) {
             router.push('/')
             return
@@ -64,8 +65,9 @@ const deleteCategory = async (id) => {
             return
         }
 
-        const res1 = await getCategories()
-        categories.value = res1.data
+            const res = await getCategories()
+            categories.value = res.data
+
     }
 }
 
@@ -120,15 +122,14 @@ const getCategoriesAndCategoryAndRecipes = async () => {
     singleCategory.value = res2.data
     recipes.value = res3.data
     categories.value = res1.data
-
-
 }
+
+// when created (in lifecycel hook)
 getCategoriesAndCategoryAndRecipes()
 
 // -----------------------
 
 // onMounted(async () => {
-//     getCategoriesAndCategoryAndRecipes()
 // })
 
 
@@ -163,7 +164,6 @@ watch(route, async () => {
             <i class="fas fa-utensils fa-lg"></i>
         </span>
         <div>
-            <!-- <span>{{ category.title }}</span> -->
             <span>{{ singleCategory.title }}</span>
             <form method="post" v-on:submit.prevent="addRecipe">
                 <input type="text" v-model="newRecipe">
