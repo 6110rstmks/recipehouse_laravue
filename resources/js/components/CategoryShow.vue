@@ -101,7 +101,7 @@ const submitNewRecipe = () => {
 }
 
 const addRecipe = async() => {
-    submitNewRecipe()
+    await submitNewRecipe()
     const a2 = await getRecipes()
     recipes.value = a2.data
     newRecipe.value = ''

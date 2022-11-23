@@ -24,6 +24,7 @@ class RecipeController extends Controller
         $recipe->save();
 
         $category->recipes()->syncWithoutDetaching($recipe->id);
-        return $recipe;
+        // return $recipe;
+        return 'complete';
     }
 }
