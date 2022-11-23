@@ -15,7 +15,7 @@ const categories = ref([])
 
 const newCategory = ref('')
 
-const category = ref({})
+const singleCategory = ref({})
 
 const recipes = ref([])
 
@@ -24,13 +24,16 @@ const newRecipe = ref('')
 let categoryId = parseInt(route.params.categoryId)
 
 const submitNewCategory = () => {
-  return new Promise((resolve) => {
-    axios.post('/api/categories/store', {
-        title: newCategory.value
+    return new Promise((resolve) => {
+        axios.post('/api/categories/store', {
+            title: newCategory.value
+        }).then(response => {
+            console.log('nuts')
+            resolve(response);
+        })
     })
-    resolve();
-  })
 }
+
 
 const addCategory = async () => {
     await submitNewCategory()
@@ -43,7 +46,7 @@ const addCategory = async () => {
 const deleteCategory = async (id) => {
     if (confirm('Are you sure?'))
     {
-        axios.delete('/api/categories/' + id)
+        const comp = await axios.delete('/api/categories/' + id)
 
         //  カテゴリが一件しかない状態でそれを削除するとデフォルトページへ遷移
         if (categories.value.length === 1) {
@@ -66,7 +69,6 @@ const deleteCategory = async (id) => {
     }
 }
 
-// The category acquired in this function is displayed on the right screen.
 
 
 const getCategory = () => {
@@ -89,8 +91,12 @@ const getMaxIdCategory = () => {
 // function relate to recipe
 
 const submitNewRecipe = () => {
-    axios.post('/api/categories/' + categoryId + '/recipes/store', {
-        title: newRecipe.value
+    return new Promise((resolve) => {
+        axios.post('/api/categories/' + categoryId + '/recipes/store', {
+            title: newRecipe.value
+        }).then((res) => {
+            resolve(res)
+        })
     })
 }
 
@@ -111,7 +117,7 @@ const getCategoriesAndCategoryAndRecipes = async () => {
     const res1 = await getCategories()
     const res2 = await getCategory()
     const res3 = await getRecipes()
-    category.value = res2.data
+    singleCategory.value = res2.data
     recipes.value = res3.data
     categories.value = res1.data
 
@@ -121,9 +127,9 @@ getCategoriesAndCategoryAndRecipes()
 
 // -----------------------
 
-onMounted(async () => {
-    // getCategoriesAndCategoryAndRecipes()
-})
+// onMounted(async () => {
+//     getCategoriesAndCategoryAndRecipes()
+// })
 
 
 watch(route, async () => {
@@ -157,8 +163,8 @@ watch(route, async () => {
             <i class="fas fa-utensils fa-lg"></i>
         </span>
         <div>
-            <span>{{ category.title }}</span>
-            <!-- <span>{{ currentCategory.title }}</span> -->
+            <!-- <span>{{ category.title }}</span> -->
+            <span>{{ singleCategory.title }}</span>
             <form method="post" v-on:submit.prevent="addRecipe">
                 <input type="text" v-model="newRecipe">
             </form>

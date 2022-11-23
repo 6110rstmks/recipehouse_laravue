@@ -16,7 +16,6 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
-        Log::debug($category);
         return $category;
     }
 
@@ -24,7 +23,6 @@ class CategoryController extends Controller
     {
         $maxId = Category::max('id');
 
-        Log::debug($maxId);
 
         // if category is not exist...
         if ($maxId == null)
@@ -40,19 +38,18 @@ class CategoryController extends Controller
     {
         $category->delete();
 
-        return $category;
+        return 'complete';
+
     }
 
     public function store(Request $request)
     {
-        // Log::debug($request);
+
         $category = new Category();
         $category->title = $request->title;
         $category->save();
 
-        return 'kanryou';
+        return 'complete';
 
-        // return redirect()
-        // ->route('category.index');
     }
 }

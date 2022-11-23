@@ -12,10 +12,6 @@ class RecipeController extends Controller
     public function index(Category $category)
     {
 
-        // Log::debug(Recipe::latest()->get());
-        // return Recipe::latest()->get();
-        // Log::debug($category->recipes()->al l());
-        // return $category->recipes()->find(1);
         return $category->recipes()->get();
     }
 
@@ -27,10 +23,7 @@ class RecipeController extends Controller
 
         $recipe->save();
 
-        // $category->recipes()->syncWithoutDetaching($recipe->id);
         $category->recipes()->syncWithoutDetaching($recipe->id);
-
-        return redirect()
-            ->route('category.show', $category);
+        return $recipe;
     }
 }
