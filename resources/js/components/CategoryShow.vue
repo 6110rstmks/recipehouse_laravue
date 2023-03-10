@@ -35,28 +35,30 @@ const submitNewCategory = () => {
     })
 }
 
-
 const addCategory = async () => {
     await submitNewCategory()
-    const a1 = await getMaxIdCategory()
-    categoryId =a1.data.id
+
     newCategory.value = ''
+
+    // 右側を最新のカテゴリに更新する
+    const a1 = await getMaxIdCategory()
+    categoryId = a1.data.id
     router.push({name: 'category.show', params: { categoryId: categoryId }})
 }
 
 const deleteCategory = async (id) => {
     if (confirm('Are you sure?'))
     {
-        const comp = await axios.delete('/api/categories/' + id)
+        // 同期処理をするために、compSignの変数で受ける。
+        const compSign = await axios.delete('/api/categories/' + id)
 
-        //  move default page when category deleting the category that only one
+        //  move default page('/') when deleting the category that only one
         if (categories.value.length === 1) {
             router.push('/')
             return
         }
 
-        // if deleting the same category that is currently displayed on the screen...
-
+        // if deleting the same category that is currently displayed on the right screen
         if (categoryId === id)
         {
             let res = await getMaxIdCategory()
@@ -65,9 +67,10 @@ const deleteCategory = async (id) => {
             return
         }
 
-            const res = await getCategories()
-            categories.value = res.data
-
+        // 削除したので改めてカテゴリ一覧を再取得
+        // 削除のときはurlを変更する仕様にしていない
+        const responseCategories = await getCategories()
+        categories.value = responseCategories.data
     }
 }
 
@@ -109,6 +112,17 @@ const addRecipe = async() => {
     newRecipe.value = ''
 }
 
+const deleteRecipe = async (recipeId) => {
+    console.log(recipeId)
+    const comp = await axios.delete('/api/categories/recipes/delete/' + recipeId)
+
+    const responseRecipes = await getRecipes()
+    console.log(responseRecipes.data)
+
+    recipes.value = responseRecipes.data
+
+}
+
 
 const getRecipes = () => {
     return axios.get('/api/categories/' + categoryId + '/recipes/')
@@ -116,12 +130,12 @@ const getRecipes = () => {
 
 const getCategoriesAndCategoryAndRecipes = async () => {
     categoryId = parseInt(route.params.categoryId)
-    const res1 = await getCategories()
-    const res2 = await getCategory()
-    const res3 = await getRecipes()
-    singleCategory.value = res2.data
-    recipes.value = res3.data
-    categories.value = res1.data
+    const tmpCategories = await getCategories()
+    const tmpCategory = await getCategory()
+    const tmpRecipes = await getRecipes()
+    singleCategory.value = tmpCategory.data
+    recipes.value = tmpRecipes.data
+    categories.value = tmpCategories.data
 }
 
 // when created (in lifecycel hook)
@@ -132,7 +146,7 @@ getCategoriesAndCategoryAndRecipes()
 // onMounted(async () => {
 // })
 
-
+//
 watch(route, async () => {
     if (!isNaN(categoryId))
     {
@@ -169,7 +183,11 @@ watch(route, async () => {
                 <input type="text" v-model="newRecipe">
             </form>
             <ul style="margin-top: 15px;">
-                <li v-for="recipe in recipes">{{ recipe.title }}</li>
+                <li v-for="recipe in recipes">
+                    <span>{{ recipe.title }}</span>
+                    <button @click="deleteRecipe(recipe.id)">削除</button>
+                    <!-- <button @click="deleteRecipe()">削除</button> -->
+                </li>
             </ul>
         </div>
     </div>

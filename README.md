@@ -17,3 +17,22 @@ Category-Recipeの多対多となっております。（レシピからカテ�
 このとき、削除したカテゴリにひもづいたレシピは削除されます。
 
 すべてのカテゴリを削除すると、右画面にNot categoryと表示されます。
+
+### 自分用
+
+git clone したあとにやること一覧
+
+php artisan key:generate
+
+chmod -R 777 storage bootstrap/cache
+
+sudo /opt/lampp/lampp start
+
+mv .env.example .env
+
+mysql 接続
+
+
+npm run dev
+php artisan serve
+php artisan migrate

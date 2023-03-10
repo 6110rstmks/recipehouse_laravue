@@ -24,7 +24,14 @@ class RecipeController extends Controller
         $recipe->save();
 
         $category->recipes()->syncWithoutDetaching($recipe->id);
-        // return $recipe;
         return 'complete';
+    }
+    public function delete(Recipe $recipe)
+    {
+        Log::info("iui");
+
+        $recipe->delete();
+        return 'complete';
+
     }
 }
