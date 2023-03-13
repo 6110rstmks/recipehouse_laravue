@@ -15,6 +15,8 @@ const categories = ref([])
 
 const newCategory = ref('')
 
+const errMsg = ref('')
+
 const singleCategory = ref({})
 
 const recipes = ref([])
@@ -22,6 +24,15 @@ const recipes = ref([])
 const newRecipe = ref('')
 
 let categoryId = ''
+
+//----------------------
+// file upload
+
+const fileInfo = ref("")
+const user = ref(null)
+const showUserImage = ref(false)
+const filePath = ref("")
+//----------------------
 
 // let categoryId = parseInt(route.params.categoryId)
 
@@ -36,6 +47,13 @@ const submitNewCategory = () => {
 }
 
 const addCategory = async () => {
+    if (newCategory.value.length === 0)
+    {
+        errMsg.value = "文字を入力してください"
+        return
+    } else {
+        errMsg.value = ""
+    }
     await submitNewCategory()
 
     newCategory.value = ''
@@ -112,6 +130,28 @@ const addRecipe = async() => {
     newRecipe.value = ''
 }
 
+const fileSelected = (event) => {
+
+    fileInfo.value = event.target.files[0]
+
+    const formData = new FormData()
+
+    formData.append('file', fileInfo.value)
+
+    axios.post('/api/img_upload', formData).then((response) => {
+        // console.log(response.data)
+
+        if (response.data === 'ok')
+        {
+            showUserImage.value = true;
+            user.value = fileInfo.value.name
+            console.log(user.value)
+        } else {
+
+        }
+    })
+};
+
 const deleteRecipe = async (recipeId) => {
     console.log(recipeId)
     const comp = await axios.delete('/api/categories/recipes/delete/' + recipeId)
@@ -120,7 +160,6 @@ const deleteRecipe = async (recipeId) => {
     console.log(responseRecipes.data)
 
     recipes.value = responseRecipes.data
-
 }
 
 
@@ -161,9 +200,13 @@ watch(route, async () => {
             <h4 style="margin-bottom: 20px; margin-top: 10px">RECIPE HOUSE</h4>
             <form method="post" v-on:submit.prevent="addCategory">
                 <input type="text" v-model="newCategory">
+                <button type="submit" disabled style="display: none" aria-hidden="true"></button>
+                <div>
+                    <button>SUBMIT</button>
+                </div>
             </form>
         </div>
-        <ul class="category_ul">
+        <ul class="category_ul" style="margin-top: 30px">
             <li v-for="category in categories" :key="category.id">
                 <button class="btn btn-danger" v-on:click="deleteCategory(category.id)">Delete</button>
                 <router-link :to="{name: 'category.show', params: {categoryId: category.id }}">
@@ -172,6 +215,8 @@ watch(route, async () => {
             </li>
         </ul>
     </div>
+    {{ errMsg }}
+
 
     <div class="right-container">
         <span class="icon">
@@ -181,12 +226,21 @@ watch(route, async () => {
             <span>{{ singleCategory.title }}</span>
             <form method="post" v-on:submit.prevent="addRecipe">
                 <input type="text" v-model="newRecipe">
+                <p><input type="file" @change="fileSelected" /></p>
+
+                <div v-if="showUserImage">
+                    <img :src="'/storage/' + user" />
+                </div>
+
+                <button type="submit" disabled style="display: none" aria-hidden="true"></button>
+                <div>
+                    <button>SUBMIT</button>
+                </div>
             </form>
             <ul style="margin-top: 15px;">
                 <li v-for="recipe in recipes">
                     <span>{{ recipe.title }}</span>
                     <button @click="deleteRecipe(recipe.id)">削除</button>
-                    <!-- <button @click="deleteRecipe()">削除</button> -->
                 </li>
             </ul>
         </div>

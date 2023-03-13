@@ -42,4 +42,9 @@ Route::post('/categories/{category}/recipes/store', [RecipeController::class, 's
 Route::delete('/categories/recipes/delete/{recipe}', [RecipeController::class, 'delete'])
     ->where('recipe', '[0-9]+');
 
+Route::post('/img_upload',[RecipeController::class, 'imgUpload']);
+    // ->name('')
+    // $file_name = request()->file->getClientOriginalName();
+    // request()->file->storeAs('public/',$file_name);
+
 

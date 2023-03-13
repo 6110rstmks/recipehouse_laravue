@@ -21,17 +21,30 @@ class RecipeController extends Controller
 
         $recipe->title = $request->title;
 
+        if ($request->file_path)
+        {
+            $recipe->file_path = $request->file_path;
+        }
+
         $recipe->save();
 
         $category->recipes()->syncWithoutDetaching($recipe->id);
         return 'complete';
     }
+
     public function delete(Recipe $recipe)
     {
-        Log::info("iui");
-
         $recipe->delete();
         return 'complete';
+    }
 
+    public function imgUpload(Request $request)
+    {
+        Log::info($request);
+        $file_name = $request->file->getClientOriginalName();
+
+        $request->file->storeAs('public', $file_name);
+
+        return 'ok';
     }
 }

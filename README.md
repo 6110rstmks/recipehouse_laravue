@@ -36,3 +36,9 @@ mysql 接続
 npm run dev
 php artisan serve
 php artisan migrate
+
+### todo 
+
+file upload 
+
+pagination

@@ -9,6 +9,12 @@ class Recipe extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'title',
+        'description',
+        'file_path',
+    ];
+
     public function categories()
     {
         return $this->belongsToMany(Category::class);
