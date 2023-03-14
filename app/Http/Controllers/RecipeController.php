@@ -40,7 +40,7 @@ class RecipeController extends Controller
 
     public function imgUpload(Request $request)
     {
-        Logger::info('iu');
+        Log::info('iu');
         $file_name = $request->file->getClientOriginalName();
 
         $request->file->storeAs('public', $file_name);
@@ -50,5 +50,7 @@ class RecipeController extends Controller
 
     public function getRecipe(Recipe $recipe)
     {
+        Log::debug($recipe);
+        return $recipe;
     }
 }

@@ -34,17 +34,29 @@ const showUserImage = ref(false)
 const filePath = ref("")
 //----------------------
 
-// let categoryId = parseInt(route.params.categoryId)
+
+const inputValidation = async (text) => {
+    return new Promise((resolve, reject) => {
+        if (text.length <= 1)
+        {
+            reject("文字を入力してください")
+        } else {
+            resolve("")
+        }
+    })
+}
 
 
 const addCategory = async () => {
-    if (newCategory.value.length <= 1)
-    {
-        errMsg.value = "文字を入力してください"
+
+    try {
+
+        errMsg.value = await inputValidation(newCategory.value)
+    } catch {
+        errMsg.value = "1文字以上入力"
         return
-    } else {
-        errMsg.value = ""
     }
+
     await submitNewCategory(newCategory.value)
 
     newCategory.value = ''
@@ -115,6 +127,7 @@ const submitNewRecipe = (categoryId) => {
 }
 
 const addRecipe = async() => {
+
     let categoryId = parseInt(route.params.categoryId)
     await submitNewRecipe(categoryId)
     const a2 = await getRecipesLinkedWithCategory(categoryId)
@@ -131,7 +144,6 @@ const fileSelected = (event) => {
     formData.append('file', fileInfo.value)
 
     axios.post('/api/img_upload', formData).then((response) => {
-        // console.log(response.data)
 
         if (response.data === 'ok')
         {
@@ -173,7 +185,6 @@ const getCategoriesAndCategoryAndRecipes = async () => {
         return
     }
     let categoryId = parseInt(route.params.categoryId)
-    console.log('uuu')
     const tmpCategories = await getCategories()
     const tmpCategory = await getCategory(categoryId)
     const tmpRecipes = await getRecipesLinkedWithCategory(categoryId)
@@ -234,7 +245,7 @@ watch(route, async () => {
                 <p><input type="file" @change="fileSelected" /></p>
 
                 <div v-if="showUserImage">
-                    <img :src="'/storage/' + user" />
+                    <img width="200" :src="'/storage/' + user" />
                 </div>
 
                 <button type="submit" disabled style="display: none" aria-hidden="true"></button>

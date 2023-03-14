@@ -19,19 +19,6 @@
 // let categoryId = ''
 
 
-// export async function initial() {
-//     try {
-//         // const router = useRouter()
-//         const router = import('./router.js')
-//         const res = await axios.get('/api/max')
-//         categoryId = res.data.id
-//         router.push({name: 'category.show', params: { categoryId: categoryId }})
-//     } catch(err) {
-//         console.log('error handling')
-//     }
-
-// }
-
 export function submitNewCategory(newCategory) {
     return new Promise((resolve) => {
         axios.post('/api/categories/store', {

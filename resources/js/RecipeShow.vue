@@ -9,13 +9,16 @@ import { onMounted, ref, computed } from "vue"
         return route.params.id;
     });
 
-    const getRecipes = () => {
+    const getRecipe = (recipeId) => {
         return axios.get('/api/recipes/' + recipeId)
     }
 
-    const tmpRecipes = ref()
+    const initial = async () => {
+        const recipe = await getRecipe(recipeId)
 
-    tmpRecipes.value = getRecipes()
+    }
+
+
 
 
 </script>
