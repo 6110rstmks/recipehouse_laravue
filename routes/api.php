@@ -10,7 +10,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/categories', [CategoryController::class, 'index']);
-// Route::get('/', [CategoryController::class, 'index']);
 
 
 Route::get('/categories/{category}', [CategoryController::class, 'show'])
@@ -32,7 +31,7 @@ Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])
 /* --------------------------------------------------------- */
                 /* RecipeController */
 
-Route::get('/categories/{category}/recipes', [RecipeController::class, 'index'])
+Route::get('/categories/{category}/recipes', [RecipeController::class, 'getRecipes'])
     ->where('category', '[0-9]+');
 
 
@@ -47,4 +46,7 @@ Route::post('/img_upload',[RecipeController::class, 'imgUpload']);
     // $file_name = request()->file->getClientOriginalName();
     // request()->file->storeAs('public/',$file_name);
 
+Route::get('/recipes/show/{recipe}', [RecipeController::class, 'detailedPage'])
+    ->name('recipe.show')
+    ->where('recipe', '[0-9]+');
 

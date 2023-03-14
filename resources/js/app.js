@@ -1,11 +1,10 @@
-// localで確認するときは、php artisan serve とnpm run devを実行してください
-// 久しぶりに確認するときは忘れがち。
 import './bootstrap';
 import { createApp } from 'vue/dist/vue.esm-bundler'
 import * as VueRouter from 'vue-router'
 
 import CategoryHome from './components/CategoryHome.vue'
 import CategoryShow from './components/CategoryShow.vue'
+import RecipeShow from './RecipeShow.vue'
 
 const routes = [
     {
@@ -23,6 +22,10 @@ const routes = [
         },
         props: true
     },
+    {
+        path: '/recipes/show/:recipeId',
+        component: RecipeShow
+    }
 ]
 
 const router = VueRouter.createRouter({

@@ -3,6 +3,7 @@
 import { onMounted, ref } from "vue"
 
 import { useRouter } from 'vue-router'
+import { submitNewCategory } from "../utils";
 
 // import router from '../router.js'
 
@@ -24,18 +25,8 @@ async function initial() {
 
 initial()
 
-const submitNewCategory = () => {
-    return new Promise((resolve) => {
-        axios.post('/api/categories/store', {
-            title: newCategory.value
-        }).then(response => {
-            resolve(response);
-        })
-    })
-}
-
 const addCategory = async () => {
-    await submitNewCategory()
+    await submitNewCategory(newCategory.value)
     const res = await getMaxIdCategory()
     categoryId = res.data.id
     router.push({name: 'category.show', params: { categoryId: categoryId }})

@@ -32,15 +32,16 @@
 
 // }
 
-// export const submitNewCategory = () => {
-//     return new Promise((resolve) => {
-//         axios.post('/api/categories/store', {
-//             title: newCategory.value
-//         }).then(response => {
-//             resolve(response);
-//         })
-//     })
-// }
+export function submitNewCategory(newCategory) {
+    return new Promise((resolve) => {
+        axios.post('/api/categories/store', {
+            // title: newCategory.value
+            title: newCategory
+        }).then(response => {
+            resolve(response);
+        })
+    })
+}
 
 
 // export const addCategory = async () => {

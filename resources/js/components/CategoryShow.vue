@@ -3,6 +3,8 @@ import axios from "axios";
 import { defineProps, ref, watch} from "vue"
 import { useRoute, useRouter } from 'vue-router'
 
+import { submitNewCategory } from "../utils.js";
+
 const route = useRoute()
 
 const router = useRouter()
@@ -23,8 +25,6 @@ const recipes = ref([])
 
 const newRecipe = ref('')
 
-let categoryId = ''
-
 //----------------------
 // file upload
 
@@ -36,31 +36,22 @@ const filePath = ref("")
 
 // let categoryId = parseInt(route.params.categoryId)
 
-const submitNewCategory = () => {
-    return new Promise((resolve) => {
-        axios.post('/api/categories/store', {
-            title: newCategory.value
-        }).then(response => {
-            resolve(response);
-        })
-    })
-}
 
 const addCategory = async () => {
-    if (newCategory.value.length === 0)
+    if (newCategory.value.length <= 1)
     {
         errMsg.value = "文字を入力してください"
         return
     } else {
         errMsg.value = ""
     }
-    await submitNewCategory()
+    await submitNewCategory(newCategory.value)
 
     newCategory.value = ''
 
     // 右側を最新のカテゴリに更新する
-    const a1 = await getMaxIdCategory()
-    categoryId = a1.data.id
+    const tmpVar = await getMaxIdCategory()
+    let categoryId = tmpVar.data.id
     router.push({name: 'category.show', params: { categoryId: categoryId }})
 }
 
@@ -76,12 +67,15 @@ const deleteCategory = async (id) => {
             return
         }
 
+        let nowRightCategoryId = parseInt(route.params.categoryId)
+
+
         // if deleting the same category that is currently displayed on the right screen
-        if (categoryId === id)
+        if (nowRightCategoryId === id)
         {
             let res = await getMaxIdCategory()
-            categoryId = res.data.id
-            router.push({name: 'category.show', params: { categoryId: categoryId }})
+            const nextRightCategoryId = res.data.id
+            router.push({name: 'category.show', params: { categoryId: nextRightCategoryId }})
             return
         }
 
@@ -92,12 +86,9 @@ const deleteCategory = async (id) => {
     }
 }
 
-
-
-const getCategory = () => {
+const getCategory = (categoryId) => {
     return axios.get('/api/categories/' + categoryId)
 }
-
 
 
 const getCategories = () => {
@@ -113,7 +104,7 @@ const getMaxIdCategory = () => {
 // ----------------------------
 // function relate to recipe
 
-const submitNewRecipe = () => {
+const submitNewRecipe = (categoryId) => {
     return new Promise((resolve) => {
         axios.post('/api/categories/' + categoryId + '/recipes/store', {
             title: newRecipe.value
@@ -124,8 +115,9 @@ const submitNewRecipe = () => {
 }
 
 const addRecipe = async() => {
-    await submitNewRecipe()
-    const a2 = await getRecipes()
+    let categoryId = parseInt(route.params.categoryId)
+    await submitNewRecipe(categoryId)
+    const a2 = await getRecipesLinkedWithCategory(categoryId)
     recipes.value = a2.data
     newRecipe.value = ''
 }
@@ -153,25 +145,38 @@ const fileSelected = (event) => {
 };
 
 const deleteRecipe = async (recipeId) => {
-    console.log(recipeId)
     const comp = await axios.delete('/api/categories/recipes/delete/' + recipeId)
-
-    const responseRecipes = await getRecipes()
+    let categoryId = parseInt(route.params.categoryId)
+    const responseRecipes = await getRecipesLinkedWithCategory(categoryId)
     console.log(responseRecipes.data)
 
     recipes.value = responseRecipes.data
 }
 
 
-const getRecipes = () => {
+const getRecipesLinkedWithCategory = (categoryId) => {
     return axios.get('/api/categories/' + categoryId + '/recipes/')
 }
 
 const getCategoriesAndCategoryAndRecipes = async () => {
-    categoryId = parseInt(route.params.categoryId)
+
+    const str = route.params.categoryId
+
+    const regex = RegExp('[a-zA-Z]+')
+
+    // urlの数値の部分にstringがはいったとき、最大のidにとばす
+    if (regex.test(str))
+    {
+        const tmpVar = await getMaxIdCategory()
+        const categoryId = tmpVar.data.id
+        router.push({name: 'category.show', params: { categoryId: categoryId }})
+        return
+    }
+    let categoryId = parseInt(route.params.categoryId)
+    console.log('uuu')
     const tmpCategories = await getCategories()
-    const tmpCategory = await getCategory()
-    const tmpRecipes = await getRecipes()
+    const tmpCategory = await getCategory(categoryId)
+    const tmpRecipes = await getRecipesLinkedWithCategory(categoryId)
     singleCategory.value = tmpCategory.data
     recipes.value = tmpRecipes.data
     categories.value = tmpCategories.data
@@ -185,12 +190,12 @@ getCategoriesAndCategoryAndRecipes()
 // onMounted(async () => {
 // })
 
-//
 watch(route, async () => {
-    if (!isNaN(categoryId))
-    {
-        getCategoriesAndCategoryAndRecipes()
-    }
+    //
+    // if (!isNaN(categoryId))
+    // {
+    // }
+    getCategoriesAndCategoryAndRecipes()
 })
 </script>
 
@@ -239,7 +244,7 @@ watch(route, async () => {
             </form>
             <ul style="margin-top: 15px;">
                 <li v-for="recipe in recipes">
-                    <span>{{ recipe.title }}</span>
+                    <a :href="'/recipes/show/' + recipe.id">{{ recipe.title }}</a>
                     <button @click="deleteRecipe(recipe.id)">削除</button>
                 </li>
             </ul>

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class RecipeController extends Controller
 {
-    public function index(Category $category)
+    public function getRecipes(Category $category)
     {
 
         return $category->recipes()->get();
@@ -40,11 +40,15 @@ class RecipeController extends Controller
 
     public function imgUpload(Request $request)
     {
-        Log::info($request);
+        Logger::info('iu');
         $file_name = $request->file->getClientOriginalName();
 
         $request->file->storeAs('public', $file_name);
 
         return 'ok';
+    }
+
+    public function getRecipe(Recipe $recipe)
+    {
     }
 }
