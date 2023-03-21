@@ -39,6 +39,7 @@ php artisan migrate
 
 ### todo 
 
-file upload 
+soft deleting
+
 
 pagination

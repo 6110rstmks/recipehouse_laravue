@@ -11,7 +11,6 @@ class RecipeController extends Controller
 {
     public function getRecipes(Category $category)
     {
-
         return $category->recipes()->get();
     }
 
