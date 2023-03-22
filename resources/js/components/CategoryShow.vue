@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import axios from "axios";
-import { defineProps, ref, watch} from "vue"
+import { defineProps, ref, reactive, watch} from "vue"
 import { useRoute, useRouter } from 'vue-router'
 
-import { submitNewCategory } from "../utils.js";
+import { submitNewCategory } from "../utils";
 
 const route = useRoute()
 
@@ -11,19 +11,36 @@ const router = useRouter()
 
 const props = defineProps({
   categoryId: String,
+//   categoryId: Number,
 })
 
 const categories = ref([])
 
-const newCategory = ref('')
+const newCategoryTitle = ref<string>('')
 
-const errMsg = ref('')
+const errMsg = ref<string>('')
 
-const singleCategory = ref({})
+interface Category {
+    id?: number
+    title?: string
+    created_at?: string
+    updated_at?: string
+}
+
+
+
+// const singleCategory: Category = reactive({
+const singleCategory: Category = ref({
+  id: 0,
+  title: '',
+  created_at: '',
+  updated_at: '',
+});
+// const singleCategory = ref({})
 
 const recipes = ref([])
 
-const newRecipe = ref('')
+const newRecipe = ref<string>('')
 
 //----------------------
 // file upload
@@ -35,11 +52,11 @@ const filePath = ref("")
 //----------------------
 
 
-const inputValidation = async (text) => {
+const inputValidation = async (text:string):Promise<string> => {
     return new Promise((resolve, reject) => {
         if (text.length <= 1)
         {
-            reject("文字を入力してください")
+            reject("１文字以上入力してください")
         } else {
             resolve("")
         }
@@ -48,26 +65,23 @@ const inputValidation = async (text) => {
 
 
 const addCategory = async () => {
-
     try {
-
-        errMsg.value = await inputValidation(newCategory.value)
+        errMsg.value = await inputValidation(newCategoryTitle.value)
     } catch {
-        errMsg.value = "1文字以上入力"
+        errMsg.value = "１文字以上入力してください"
         return
     }
+    await submitNewCategory(newCategoryTitle.value)
 
-    await submitNewCategory(newCategory.value)
-
-    newCategory.value = ''
+    newCategoryTitle.value = ''
 
     // 右側を最新のカテゴリに更新する
-    const tmpVar = await getMaxIdCategory()
+    const tmpVar:Category = await getMaxIdCategory()
     let categoryId = tmpVar.data.id
     router.push({name: 'category.show', params: { categoryId: categoryId }})
 }
 
-const deleteCategory = async (id) => {
+const deleteCategory = async (id: number) => {
     if (confirm('Are you sure?'))
     {
         // 同期処理をするために、compSignの変数で受ける。
@@ -79,13 +93,13 @@ const deleteCategory = async (id) => {
             return
         }
 
-        let nowRightCategoryId = parseInt(route.params.categoryId)
+        let nowRightCategoryId:number = parseInt(route.params.categoryId)
 
 
         // if deleting the same category that is currently displayed on the right screen
         if (nowRightCategoryId === id)
         {
-            let res = await getMaxIdCategory()
+            let res:Category = await getMaxIdCategory()
             const nextRightCategoryId = res.data.id
             router.push({name: 'category.show', params: { categoryId: nextRightCategoryId }})
             return
@@ -98,17 +112,17 @@ const deleteCategory = async (id) => {
     }
 }
 
-const getCategory = (categoryId) => {
+const getCategory = (categoryId:number):Promise<Category> => {
     return axios.get('/api/categories/' + categoryId)
 }
 
 
-const getCategories = () => {
+const getCategories = ():Promise<unknown> => {
     return axios.get('/api/categories')
 }
 
 
-const getMaxIdCategory = () => {
+const getMaxIdCategory = ():Promise<Category> => {
     return axios.get('/api/max')
 }
 
@@ -116,7 +130,7 @@ const getMaxIdCategory = () => {
 // ----------------------------
 // function relate to recipe
 
-const submitNewRecipe = (categoryId) => {
+const submitNewRecipe = (categoryId:number):Promise<unknown> => {
     return new Promise((resolve) => {
         axios.post('/api/categories/' + categoryId + '/recipes/store', {
             title: newRecipe.value
@@ -126,7 +140,7 @@ const submitNewRecipe = (categoryId) => {
     })
 }
 
-const addRecipe = async() => {
+const addRecipe = async():Promise<void> => {
 
     let categoryId = parseInt(route.params.categoryId)
     await submitNewRecipe(categoryId)
@@ -135,9 +149,11 @@ const addRecipe = async() => {
     newRecipe.value = ''
 }
 
-const fileSelected = (event) => {
-
+const fileSelected = (event: Event) => {
+    console.log(event.target);
     fileInfo.value = event.target.files[0]
+    // fileInfo.value = (event.target as HTMLInputElement).files[0]
+
 
     const formData = new FormData()
 
@@ -156,39 +172,38 @@ const fileSelected = (event) => {
     })
 };
 
-const deleteRecipe = async (recipeId) => {
+const deleteRecipe = async (recipeId):void => {
     const comp = await axios.delete('/api/categories/recipes/delete/' + recipeId)
     let categoryId = parseInt(route.params.categoryId)
     const responseRecipes = await getRecipesLinkedWithCategory(categoryId)
-    console.log(responseRecipes.data)
-
     recipes.value = responseRecipes.data
 }
 
 
-const getRecipesLinkedWithCategory = (categoryId) => {
+const getRecipesLinkedWithCategory = (categoryId:number) => {
     return axios.get('/api/categories/' + categoryId + '/recipes/')
 }
 
-const getCategoriesAndCategoryAndRecipes = async () => {
+const getCategoriesAndCategoryAndRecipes = async ():Promise<void> => {
 
-    const str = route.params.categoryId
+    const str:string|string[] = route.params.categoryId
 
     const regex = RegExp('[a-zA-Z]+')
 
     // urlの数値の部分にstringがはいったとき、最大のidにとばす
     if (regex.test(str))
     {
-        const tmpVar = await getMaxIdCategory()
+        const tmpVar:Category = await getMaxIdCategory()
         const categoryId = tmpVar.data.id
         router.push({name: 'category.show', params: { categoryId: categoryId }})
         return
     }
     let categoryId = parseInt(route.params.categoryId)
     const tmpCategories = await getCategories()
-    const tmpCategory = await getCategory(categoryId)
+    const tmpCategory:Category = await getCategory(categoryId)
     const tmpRecipes = await getRecipesLinkedWithCategory(categoryId)
     singleCategory.value = tmpCategory.data
+    console.log(singleCategory.value)
     recipes.value = tmpRecipes.data
     categories.value = tmpCategories.data
 }
@@ -215,7 +230,7 @@ watch(route, async () => {
         <div class="form-box">
             <h4 style="margin-bottom: 20px; margin-top: 10px">RECIPE HOUSE</h4>
             <form method="post" v-on:submit.prevent="addCategory">
-                <input type="text" v-model="newCategory">
+                <input type="text" v-model="newCategoryTitle">
                 <button type="submit" disabled style="display: none" aria-hidden="true"></button>
                 <div>
                     <button>SUBMIT</button>
@@ -256,7 +271,7 @@ watch(route, async () => {
             <ul style="margin-top: 15px;">
                 <li v-for="recipe in recipes">
                     <a :href="'/recipes/show/' + recipe.id">{{ recipe.title }}</a>
-                    <button @click="deleteRecipe(recipe.id)">削除</button>
+                    <button @click="deleteRecipe(recipe.id)">DELETE</button>
                 </li>
             </ul>
         </div>

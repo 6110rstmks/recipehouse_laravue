@@ -1,6 +1,6 @@
 以下の技術を使用しております。
 
-フロントエンド: tailwind,vue3 
+フロントエンド: tailwind,vue3,typescript 
 バックエンド: laravel9
 データベース: MySQL
 Webサーバソフト：apache2
@@ -40,6 +40,5 @@ php artisan migrate
 ### todo 
 
 soft deleting
-
 
 pagination

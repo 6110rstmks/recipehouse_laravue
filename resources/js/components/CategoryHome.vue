@@ -1,5 +1,5 @@
-<script setup>
-// import axios from "axios"
+<script setup lang="ts">
+import axios from "axios"
 import { onMounted, ref } from "vue"
 
 import { useRouter } from 'vue-router'
@@ -20,7 +20,6 @@ async function initial() {
     } catch(err) {
         console.log('error handling')
     }
-
 }
 
 initial()
@@ -32,12 +31,9 @@ const addCategory = async () => {
     router.push({name: 'category.show', params: { categoryId: categoryId }})
 }
 
-
 const getMaxIdCategory = () => {
     return axios.get('/api/max')
 }
-
-
 
 </script>
 

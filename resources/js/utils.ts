@@ -19,7 +19,7 @@
 // let categoryId = ''
 
 
-export function submitNewCategory(newCategory) {
+export function submitNewCategory(newCategory:string):Promise<unknown> {
     return new Promise((resolve) => {
         axios.post('/api/categories/store', {
             // title: newCategory.value
